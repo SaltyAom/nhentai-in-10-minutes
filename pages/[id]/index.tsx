@@ -1,4 +1,4 @@
-import { useCallback, FormEvent, Fragment, useState } from 'react'
+import { useCallback, FormEvent, Fragment, useState, useEffect } from 'react'
 
 import { GetStaticPaths, GetStaticProps } from 'next'
 import Head from 'next/head'
@@ -8,7 +8,7 @@ import Image from 'next/image'
 import { ClientOptions, ssrExchange } from 'urql'
 import { withUrqlClient, initUrqlClient } from 'next-urql'
 
-import Input from '../../components/portal'
+import Portal from '../../components/portal'
 
 import { exchanges } from '../_app'
 
@@ -56,6 +56,10 @@ const NHentai = ({ id, nhentai, error }) => {
 
 	let router = useRouter()
 
+	useEffect(() => {
+		updateLoading(false)
+	}, [id])
+
 	let loadNewHentai = useCallback((event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault()
 		updateLoading(true)
@@ -70,7 +74,7 @@ const NHentai = ({ id, nhentai, error }) => {
 		return (
 			<Fragment>
 				<h1>Error</h1>
-				<Input isLoading={isLoading} onSubmit={loadNewHentai} />
+				<Portal isLoading={isLoading} onSubmit={loadNewHentai} />
 				<p>{JSON.stringify(error, null, 2)}</p>
 			</Fragment>
 		)
@@ -81,7 +85,7 @@ const NHentai = ({ id, nhentai, error }) => {
 		return (
 			<Fragment>
 				<h1>{id} not found</h1>
-				<Input isLoading={isLoading} onSubmit={loadNewHentai} />
+				<Portal isLoading={isLoading} onSubmit={loadNewHentai} />
 			</Fragment>
 		)
 
@@ -118,6 +122,7 @@ const NHentai = ({ id, nhentai, error }) => {
 				<meta name="twitter:description" content={`Read ${nhentai.title.display} ${nhentai.metadata.language}`} />
 				<meta name="twitter:image" content={nhentai.images.cover.link} />
 			</Head>
+			<Portal isLoading={isLoading} onSubmit={loadNewHentai} />
 			<header>
 				<small>{id}</small>
 				<h1>{nhentai.title.display}</h1>
@@ -140,7 +145,6 @@ const NHentai = ({ id, nhentai, error }) => {
 					))}
 				</ul>
 			</header>
-			<Input isLoading={isLoading} onSubmit={loadNewHentai} />
 			<main
 				style={{
 					maxWidth: 840,
