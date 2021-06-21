@@ -15,40 +15,42 @@ import { exchanges } from '../_app'
 const query = `
     query($id: Int!) {
         getHentaiById(id: $id) {
-            title {
-                display
-			}
-			info {
-				amount
-			}
-            metadata {
-				language
-				artist {
-					name
+			data {
+				title {
+					display
 				}
-                tags {
-                    name
-                    count
-                }
-            }
-            images {
-                cover {
-                    link
-                    info {
-                        width
-                        height
-                    }
-                }
-                pages {
-                    link
-                    info {
-                        width
-                        height
-                    }
-                }
-            }
-        }
-    }
+				info {
+					amount
+				}
+				metadata {
+					language
+					artist {
+						name
+					}
+					tags {
+						name
+						count
+					}
+				}
+				images {
+					cover {
+						link
+						info {
+							width
+							height
+						}
+					}
+					pages {
+						link
+						info {
+							width
+							height
+						}
+					}
+				}
+			}
+		}
+	}
 `
 
 const NHentai = ({ id, nhentai, error }) => {
@@ -94,12 +96,21 @@ const NHentai = ({ id, nhentai, error }) => {
 			<Head>
 				<title>{nhentai.title.display}</title>
 				<meta name="title" content={nhentai.title.display} />
-				<meta name="description" content={`Read ${nhentai.title.display} ${nhentai.metadata.language}`} />
+				<meta
+					name="description"
+					content={`Read ${nhentai.title.display} ${nhentai.metadata.language}`}
+				/>
 				<meta name="author" content={nhentai.metadata.artist.name} />
 
 				<meta property="og:title" content={nhentai.title.display} />
-				<meta property="og:description" content={`Read ${nhentai.title.display} ${nhentai.metadata.language}`}  />
-				<meta property="article:author" content={nhentai.metadata.artist.name} />
+				<meta
+					property="og:description"
+					content={`Read ${nhentai.title.display} ${nhentai.metadata.language}`}
+				/>
+				<meta
+					property="article:author"
+					content={nhentai.metadata.artist.name}
+				/>
 
 				<meta
 					property="og:image:width"
@@ -119,20 +130,26 @@ const NHentai = ({ id, nhentai, error }) => {
 				<meta name="twitter:card" content="summary_large_image" />
 
 				<meta name="twitter:title" content={nhentai.title.display} />
-				<meta name="twitter:description" content={`Read ${nhentai.title.display} ${nhentai.metadata.language}`} />
-				<meta name="twitter:image" content={nhentai.images.cover.link} />
+				<meta
+					name="twitter:description"
+					content={`Read ${nhentai.title.display} ${nhentai.metadata.language}`}
+				/>
+				<meta
+					name="twitter:image"
+					content={nhentai.images.cover.link}
+				/>
 			</Head>
 			<Portal isLoading={isLoading} onSubmit={loadNewHentai} />
 			<header>
 				<small>{id}</small>
 				<h1>{nhentai.title.display}</h1>
 				<div style={{ width: 300 }}>
-				<Image
-					objectFit="contain"
-					src={nhentai.images.cover.link}
-					width={nhentai.images.cover.info.width}
-					height={nhentai.images.cover.info.height}
-					alt={`${nhentai.title.display} cover`}
+					<Image
+						objectFit="contain"
+						src={nhentai.images.cover.link}
+						width={nhentai.images.cover.info.width}
+						height={nhentai.images.cover.info.height}
+						alt={`${nhentai.title.display} cover`}
 					/>
 				</div>
 				<p>Language: {nhentai.metadata.language}</p>
@@ -170,7 +187,7 @@ const NHentai = ({ id, nhentai, error }) => {
 const ssrCache = ssrExchange({ isClient: false })
 
 const createUrqlClient = (): ClientOptions => ({
-	url: 'https://nhql.saltyaom.com/graphql',
+	url: 'https://api.opener.studio/graphql',
 	exchanges: [...exchanges, ssrCache]
 })
 
@@ -189,7 +206,9 @@ export const getStaticProps: GetStaticProps = async (context) => {
 	} = context
 
 	let {
-		data: { getHentaiById: nhentai },
+		data: {
+			getHentaiById: { data: nhentai }
+		},
 		error
 	} = await client
 		.query(query, {
@@ -210,4 +229,4 @@ export const getStaticProps: GetStaticProps = async (context) => {
 export default withUrqlClient(
 	createUrqlClient,
 	{ ssr: false } // Important so we don't wrap our component in getInitialProps
-)(NHentai)
+)(NHentai as any)
